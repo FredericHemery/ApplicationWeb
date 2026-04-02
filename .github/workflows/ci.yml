@@ -22,7 +22,7 @@ jobs:
           cache: 'npm'
 
       - name: Installer les dependances
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Lancer les tests
         run: npm run test:unit
@@ -43,7 +43,7 @@ jobs:
           cache: 'npm'
 
       - name: Installer les dependances
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Build application
         run: npm run build
