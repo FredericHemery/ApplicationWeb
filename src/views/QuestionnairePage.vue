@@ -44,7 +44,6 @@ const handleStartQuiz = () => {
       </p>
       
       <div v-if="store.sortedLeaderboard.length > 0" class="mb-8">
-        <h2 class="text-xl font-semibold mb-4">Classement</h2>
         <LeaderboardTicker :entries="store.sortedLeaderboard" />
       </div>
 
@@ -102,7 +101,6 @@ const handleStartQuiz = () => {
       </div>
 
       <div v-if="store.sortedLeaderboard.length > 0" class="mb-8">
-        <h2 class="text-xl font-semibold mb-4">Classement</h2>
         <LeaderboardTicker :entries="store.sortedLeaderboard" />
       </div>
 

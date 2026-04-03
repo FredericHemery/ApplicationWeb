@@ -8,9 +8,7 @@ defineProps({
 </script>
 
 <template>
-  <div class="overflow-hidden bg-card border rounded-lg p-4">
-    <h3 class="text-lg font-semibold mb-4">Classement des Fans</h3>
-
+  <div class="overflow-hidden">
     <div class="relative">
       <div class="flex gap-8 animate-marquee whitespace-nowrap">
         <div
@@ -48,7 +46,7 @@ defineProps({
 }
 
 .animate-marquee {
-  animation: marquee 20s linear infinite;
+  animation: marquee 5s linear infinite;
 }
 
 .animate-marquee:hover {
