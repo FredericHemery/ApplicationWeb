@@ -83,7 +83,8 @@ jobs:
           username: ${{ env.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            IMAGE=$(echo "${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
+            IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
+            IMAGE=$(echo "$IMAGE" | tr '[:upper:]' '[:lower:]')
             docker pull $IMAGE:latest
             docker stop applicationweb || true
             docker rm applicationweb || true
