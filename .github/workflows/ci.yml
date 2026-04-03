@@ -1,10 +1,16 @@
-name: Tests et Build
+name: CI/CD Production
 
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository_owner }}/applicationweb
+  VPS_HOST: ${{ secrets.VPS_HOST }}
+  VPS_USER: ${{ secrets.VPS_USER }}
 
 jobs:
   test:
@@ -22,34 +28,62 @@ jobs:
           cache: 'npm'
 
       - name: Installer les dependances
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Lancer les tests
         run: npm run test:unit
 
   build:
-    name: Build application
+    name: Build Docker
     runs-on: ubuntu-latest
     needs: test
-    
+    permissions:
+      contents: read
+      packages: write
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
         with:
-          node-version: '20'
-          cache: 'npm'
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Installer les dependances
-        run: npm ci
-
-      - name: Build application
-        run: npm run build
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
         with:
-          name: dist
-          path: dist/
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=sha-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  deploy:
+    name: Deploy to VPS
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          script: |
+            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            docker stop applicationweb || true
+            docker rm applicationweb || true
+            docker run -d --name applicationweb -p 40110:80 --restart always ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
