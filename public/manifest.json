@@ -1,16 +1,18 @@
 {
-  "name": "MonApplication Angers",
-  "short_name": "MonApp",
-  "description": "Application de consultation des donnees d'Angers",
+  "name": "StarWars Angers",
+  "short_name": "StarWars",
+  "description": "Application Star Wars - Donnees d'Angers",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#4F46E5",
+  "background_color": "#0a0a12",
+  "theme_color": "#ffd700",
+  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "/icons/icon.svg",
       "sizes": "any",
-      "type": "image/svg+xml"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     }
   ]
 }
