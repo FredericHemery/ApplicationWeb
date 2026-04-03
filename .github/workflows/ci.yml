@@ -9,6 +9,8 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository_owner }}/applicationweb
+  VPS_HOST: ${{ secrets.VPS_HOST }}
+  VPS_USER: ${{ secrets.VPS_USER }}
 
 jobs:
   test:
@@ -77,12 +79,11 @@ jobs:
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v0.1.10
         with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          password: ${{ secrets.VPS_PASSWORD }}
-          port: 22
+          host: ${{ env.VPS_HOST }}
+          username: ${{ env.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            docker pull ghcr.io/FredericHemery/applicationweb:latest
+            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
             docker stop applicationweb || true
             docker rm applicationweb || true
-            docker run -d --name applicationweb -p 40110:80 --restart always ghcr.io/FredericHemery/applicationweb:latest
+            docker run -d --name applicationweb -p 40110:80 --restart always ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
