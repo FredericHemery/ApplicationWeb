@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { saveQuestions, saveAnswer, saveScore, getScores } from '@/services/storage'
+import { sanitizeForStorage, validateScore } from '@/services/validator'
 
 const QUESTIONS = [
   {
@@ -110,11 +111,18 @@ export const useQuizStore = defineStore('quiz', () => {
 
   async function loadLeaderboard() {
     const scores = await getScores()
-    leaderboard.value = scores.filter(s => s.type !== 'result')
+    leaderboard.value = scores
+      .filter(s => s.type !== 'result')
+      .map(s => ({
+        ...s,
+        pseudo: sanitizeForStorage(s.pseudo) || 'Anonyme',
+        score: validateScore(s.score),
+        total: validateScore(s.total) || 9
+      }))
   }
 
   function setPseudo(name) {
-    pseudo.value = name
+    pseudo.value = sanitizeForStorage(name) || 'Anonyme'
   }
 
   function startQuiz() {
@@ -164,8 +172,8 @@ export const useQuizStore = defineStore('quiz', () => {
     if (pseudo.value) {
       const entry = {
         type: 'score',
-        pseudo: pseudo.value,
-        score: score.value,
+        pseudo: sanitizeForStorage(pseudo.value),
+        score: validateScore(score.value),
         total: questions.value.length,
         date: new Date().toISOString()
       }

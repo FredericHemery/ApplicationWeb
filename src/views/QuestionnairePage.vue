@@ -1,12 +1,14 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useQuizStore } from '@/stores/quizStore'
 import QuestionCard from '@/components/QuestionCard.vue'
 import ProgressBar from '@/components/ProgressBar.vue'
 import LeaderboardTicker from '@/components/LeaderboardTicker.vue'
+import { validatePseudo, getValidationState } from '@/services/validator'
 
 const store = useQuizStore()
 const localPseudo = ref('')
+const charRejected = ref(false)
 
 onMounted(() => {
   store.loadLeaderboard()
@@ -16,6 +18,25 @@ const stepLabels = {
   1: 'Personnages',
   2: 'Films',
   3: 'Planetes'
+}
+
+const pseudoStatus = computed(() => {
+  return getValidationState(localPseudo.value)
+})
+
+const handleInput = (event) => {
+  const value = event.target.value
+  const lastChar = value.slice(-1)
+  const isValidChar = /^[a-zA-Z0-9\s]$/.test(lastChar) || lastChar === ''
+  
+  if (!isValidChar && value.length > localPseudo.value.length) {
+    charRejected.value = true
+    event.target.value = localPseudo.value
+    setTimeout(() => { charRejected.value = false }, 1500)
+    return
+  }
+  
+  localPseudo.value = value
 }
 
 const allQuestionsAnswered = () => {
@@ -29,6 +50,7 @@ const handleQuestionAnswered = () => {
 }
 
 const handleStartQuiz = () => {
+  if (pseudoStatus.value === 'invalid') return
   store.setPseudo(localPseudo.value.trim() || 'Anonyme')
   store.startQuiz()
   store.loadLeaderboard()
@@ -52,16 +74,39 @@ const handleStartQuiz = () => {
       </p>
       <div class="mb-6">
         <input
-          v-model="localPseudo"
+          :value="localPseudo"
           type="text"
           placeholder="Entre ton pseudo"
-          class="w-full max-w-xs mx-auto px-4 py-3 border border-input rounded-lg text-center bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+          :class="[
+            'w-full max-w-xs mx-auto px-4 py-3 border rounded-lg text-center bg-background focus:outline-none focus:ring-2 transition-colors',
+            pseudoStatus === 'valid' ? 'border-green-500 focus:ring-green-500' : 
+            pseudoStatus === 'invalid' ? 'border-red-500 focus:ring-red-500' : 'border-input focus:ring-primary'
+          ]"
           maxlength="20"
+          @input="handleInput"
         />
+        <p v-if="charRejected" class="text-red-500 text-sm mt-2 font-medium">
+          Caracteres non autorises (lettres et chiffres uniquement)
+        </p>
+        <p v-else-if="pseudoStatus === 'invalid'" class="text-red-500 text-sm mt-2">
+          Minimum 2 caracteres
+        </p>
+        <p v-else-if="pseudoStatus === 'valid'" class="text-green-600 text-sm mt-2">
+          OK
+        </p>
+        <p v-else class="text-muted-foreground text-sm mt-2">
+          2-20 caracteres, lettres et chiffres uniquement
+        </p>
       </div>
       <button
         @click="handleStartQuiz"
-        class="px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
+        :disabled="pseudoStatus === 'invalid'"
+        :class="[
+          'px-6 py-3 rounded-lg font-medium transition-colors',
+          pseudoStatus === 'invalid' 
+            ? 'bg-muted text-muted-foreground cursor-not-allowed' 
+            : 'bg-primary text-primary-foreground hover:bg-primary/90'
+        ]"
       >
         Commencer le quiz
       </button>
