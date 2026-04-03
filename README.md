@@ -54,9 +54,13 @@ src/
 - **Docker** - Conteneurisation
 - **VPS** - Deploiement production (port 40110)
 
-## Installation
+## Commentaires
 
-```bash
-npm install
-npm run dev
-```
+J'ai pas mal galerer pour la CI/CD principalement pour me connecter a mon vps depuis github actions.
+Finalement le merge de la dev vers la main déclanche un pipeline qui teste l'application, build une image docker et la pousse depuis github vers mon vps.
+Je n'ai pas pris le temps (restant) pour me pencher sur la PWA. 
+J'ai préféré mettre en place une persistance de données via indexedDB pour decouvrir cette technologie.
+Je me suis rendu compte que dans l'etat actuel ca n'est pas tres pertinent, il faudrait que je mette en place un SQLite sur mon vps surement inclu dans une api perso que je 
+pourrais utiliser pour stocker les scores de manieres plus globale et pouvoir comparer les scores de tous les utilisateurs. Avec une mise a jour de la BDD a chaque reconnection de 
+l'application web.
+Coté interraction avec une API, je me suis branché sur les informations fournies par data.angers.fr.
