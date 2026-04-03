@@ -46,7 +46,7 @@ defineProps({
 }
 
 .animate-marquee {
-  animation: marquee 5s linear infinite;
+  animation: marquee 10s linear infinite;
 }
 
 .animate-marquee:hover {
