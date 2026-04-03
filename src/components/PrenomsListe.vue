@@ -1,12 +1,36 @@
 <script setup>
-import { onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { usePrenomsStore } from '@/stores/usePrenomsStore'
+import { getValidationState } from '@/services/validator'
 
 const emit = defineEmits(['prenom-clique'])
 
 const store = usePrenomsStore()
+const localSearch = ref(store.termeRecherche)
+const charRejected = ref(false)
 
 onMounted(() => store.charger())
+
+const searchStatus = computed(() => {
+  return getValidationState(localSearch.value, 0)
+})
+
+const handleSearchInput = (event) => {
+  const value = event.target.value
+  const lastChar = value.slice(-1)
+  
+  if (value.length > localSearch.value.length) {
+    if (!/^[a-zA-Z0-9\s]$/.test(lastChar)) {
+      charRejected.value = true
+      event.target.value = localSearch.value
+      setTimeout(() => { charRejected.value = false }, 1500)
+      return
+    }
+  }
+  
+  localSearch.value = value
+  store.termeRecherche = value
+}
 </script>
 
 <template>
@@ -14,7 +38,20 @@ onMounted(() => store.charger())
     <div class="flex flex-wrap gap-4 items-end">
       <div class="flex-1 min-w-[200px]">
         <label class="block text-sm font-medium mb-1">Rechercher un prenom</label>
-        <input v-model="store.termeRecherche" type="text" placeholder="Ex: Marie" class="w-full px-3 py-2 border rounded-md bg-background" />
+        <input 
+          :value="localSearch" 
+          type="text" 
+          placeholder="Ex: Marie" 
+          :class="[
+            'w-full px-3 py-2 border rounded-md bg-background transition-colors',
+            searchStatus === 'valid' ? 'border-green-500' : 
+            searchStatus === 'invalid' ? 'border-red-500' : 'border-input'
+          ]"
+          @input="handleSearchInput"
+        />
+        <p v-if="charRejected" class="text-red-500 text-xs mt-1">
+          Caracteres non autorises
+        </p>
       </div>
       <div>
         <label class="block text-sm font-medium mb-1">Annee</label>
