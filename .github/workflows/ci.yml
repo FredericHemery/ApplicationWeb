@@ -9,7 +9,6 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository_owner }}/applicationweb
-  IMAGE_NAME_LOWER: ${{ github.repository_owner.toLowerCase() }}/applicationweb
   VPS_HOST: ${{ secrets.VPS_HOST }}
   VPS_USER: ${{ secrets.VPS_USER }}
 
@@ -84,7 +83,7 @@ jobs:
           username: ${{ env.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LOWER }}:latest
+            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
             docker stop applicationweb || true
             docker rm applicationweb || true
-            docker run -d --name applicationweb -p 40110:80 --restart always ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LOWER }}:latest
+            docker run -d --name applicationweb -p 40110:80 --restart always ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
