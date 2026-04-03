@@ -85,7 +85,7 @@ jobs:
           script: |
             IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
             IMAGE=$(echo "$IMAGE" | tr '[:upper:]' '[:lower:]')
-            docker pull $IMAGE:latest
+            docker pull "${IMAGE}:latest"
             docker stop applicationweb || true
             docker rm applicationweb || true
-            docker run -d --name applicationweb -p 40110:80 --restart always $IMAGE:latest
+            docker run -d --name applicationweb -p 40110:80 --restart always "${IMAGE}:latest"
