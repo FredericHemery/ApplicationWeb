@@ -9,8 +9,8 @@ defineProps({
 
 <template>
   <div class="overflow-hidden bg-card border rounded-lg p-4">
-    <h3 class="text-lg font-semibold mb-4">Classement des participants</h3>
-    
+    <h3 class="text-lg font-semibold mb-4">Classement des Fans</h3>
+
     <div class="relative">
       <div class="flex gap-8 animate-marquee whitespace-nowrap">
         <div
@@ -22,7 +22,7 @@ defineProps({
           <span class="font-medium">{{ entry.pseudo }}</span>
           <span class="text-muted-foreground">{{ entry.score }}/{{ entry.total }}</span>
         </div>
-        
+
         <div
           v-for="(entry, index) in entries"
           :key="'dup-' + (entry.id || index)"
@@ -48,7 +48,7 @@ defineProps({
 }
 
 .animate-marquee {
-  animation: marquee 30s linear infinite;
+  animation: marquee 20s linear infinite;
 }
 
 .animate-marquee:hover {

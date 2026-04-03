@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useQuizStore } from '@/stores/quizStore'
 import QuestionCard from '@/components/QuestionCard.vue'
 import ProgressBar from '@/components/ProgressBar.vue'
@@ -7,6 +7,10 @@ import LeaderboardTicker from '@/components/LeaderboardTicker.vue'
 
 const store = useQuizStore()
 const localPseudo = ref('')
+
+onMounted(() => {
+  store.loadLeaderboard()
+})
 
 const stepLabels = {
   1: 'Personnages',
@@ -38,6 +42,12 @@ const handleStartQuiz = () => {
       <p class="text-lg text-muted-foreground mb-8">
         Teste tes connaissances sur l'univers Star Wars !
       </p>
+      
+      <div v-if="store.sortedLeaderboard.length > 0" class="mb-8">
+        <h2 class="text-xl font-semibold mb-4">Classement</h2>
+        <LeaderboardTicker :entries="store.sortedLeaderboard" />
+      </div>
+
       <p class="mb-4 text-muted-foreground">
         3 etapes | 9 questions | Decouvre ta note finale
       </p>
